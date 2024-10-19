@@ -38,15 +38,11 @@ class SeasonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EventSerializer(serializers.ModelSerializer):
-    season = SeasonSerializer(read_only=True)
-    liga = LigaSerializer(read_only=True)
-    ranger_assigned = CustomUserSerializer(read_only=True)
-    managed_by = CustomUserSerializer(read_only=True)
-
     class Meta:
         model = Event
-        fields = ['id', 'name', 'season', 'max_participant', 'base_point', 'managed_by', 'ranger_assigned', 'liga']
-
+        fields = '__all__'
+        
+    
 class ParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participation

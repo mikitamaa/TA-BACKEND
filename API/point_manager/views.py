@@ -235,34 +235,60 @@ class EventHandler(APIView):
             except Event.DoesNotExist:
                 return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
             
+        if 'ranger_assigned' in request.data:
+            ranger_assigned = request.data['ranger_assigned']['id']
+            try:
+                ranger = Event.objects.filter(ranger_assigned__id=ranger_assigned)
+                serializer = EventSerializer(ranger, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except CustomUser.DoesNotExist:
+                return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
+            
         event = Event.objects.all()
         serializer = EventSerializer(event, many=True)
         return Response(serializer.data)
     
     #REGISTER
     def post(self, request):
-        serializer = SeasonSerializer(data=request.data)
+        serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-        return Response()
+            try:
+                serializer.save()
+            except:
+                return Response({'message': 'Masih Error!'})
+        return Response({'message': 'Event berhasil dibuat.'})
     
     #UPDATE
     def patch(self, request):
         request_body = request.data
-        season_id = request_body['id']
+        event_id = request_body['id']
         name = request_body['name']
-        get_season_obj = get_object_or_404(Season, pk=season_id)
-        get_season_obj.name = name
-        get_season_obj.save()
+        season = Season.objects.get(id=request_body['season'])
+        liga = Liga.objects.get(id=request_body['liga'])
+        managed_by = CustomUser.objects.get(id=request_body['managed_by'])
+        ranger_assigned = CustomUser.objects.get(id=request_body['ranger_assigned'])
+        max_participant = request_body['max_participant']
+        base_point = request_body['base_point']
+
+        get_event_obj = get_object_or_404(Event, pk=event_id)
+        get_event_obj.name = name
+        get_event_obj.name = name
+        get_event_obj.season = season
+        get_event_obj.liga = liga
+        get_event_obj.managed_by = managed_by
+        get_event_obj.ranger_assigned = ranger_assigned
+        get_event_obj.max_participant = max_participant
+        get_event_obj.base_point = base_point
+        get_event_obj.save()
         return Response({
-            "message" : str(get_season_obj) + " is successfully edited!",
+            "message" : str(get_event_obj) + " is successfully edited!",
         }, status=status.HTTP_200_OK)
 
     #DELETE
     def delete(self, request):
         request_body = request.data
-        season_id = request_body['id']
-        get_season_obj = get_object_or_404(Season, pk=season_id)
+        event_id = request_body['id']
+        get_season_obj = get_object_or_404(Event, pk=event_id)
         get_season_obj.delete()
         return Response({
             "message" : str(get_season_obj) + " is successfully edited!",
@@ -270,49 +296,70 @@ class EventHandler(APIView):
 
 class ParticipationHandler(APIView):
     #GET
-    def get(self, request, id=None):
-        participation = Participation.objects.all()
-
-        if id is None:
+    def get(self, request):
+        if 'id' in request.data:
             participation_id = request.data['id']
-
             try:
-                if participation_id:
-                    participation = Participation.objects.filter(Q(id=participation_id)).values()
-                    serializer = ParticipationSerializer(participation)
-                    return Response(serializer.data)
+                participation = Participation.objects.get(id=participation_id)
+                serializer = ParticipationSerializer(participation)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             except Participation.DoesNotExist:
                 return Response({'message': 'Data partisipasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
-          
         
-        serializer = ParticipationSerializer(participation, many=True)
+            
+        if 'event' in request.data:
+            participation_event = request.data['event']
+            try:
+                event = Participation.objects.filter(event__id=participation_event)
+                serializer = ParticipationSerializer(event, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Participation.DoesNotExist:
+                return Response({'message': 'Data partisipasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+        event = Participation.objects.all()
+        serializer = ParticipationSerializer(event, many=True)
         return Response(serializer.data)
     
     #REGISTER
     def post(self, request):
         serializer = ParticipationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-        return Response()
+            try:
+                serializer.save()
+            except:
+                return Response({'message': 'Masih Error!'})
+        return Response({'message': 'Data Partisipasi berhasil dibuat.'})
     
     #UPDATE
     def patch(self, request):
-        request_body = request.data
-        season_id = request_body['id']
-        name = request_body['name']
-        get_season_obj = get_object_or_404(Season, pk=season_id)
-        get_season_obj.name = name
-        get_season_obj.save()
-        return Response({
-            "message" : str(get_season_obj) + " is successfully edited!",
-        }, status=status.HTTP_200_OK)
+        try:
+            for data in request.data:
+                request_body = data
+                participation_id = request_body['id']
+                player = Player.objects.get(id=request_body['player'])
+                event = Event.objects.get(id=request_body['event'])
+                point_received = request_body['point_received']
+
+                get_participation_obj = get_object_or_404(Participation, pk=participation_id)
+                get_participation_obj.player = player
+                get_participation_obj.event = event
+                get_participation_obj.point_received = point_received
+                get_participation_obj.save()
+            return Response({
+                "message" : str(get_participation_obj) + " is successfully edited!",
+            }, status=status.HTTP_200_OK)
+        except:
+            return Response({
+                "message" : str(len(request.data)) + " Gak Bisa!",
+            })
 
     #DELETE
     def delete(self, request):
         request_body = request.data
-        season_id = request_body['id']
-        get_season_obj = get_object_or_404(Season, pk=season_id)
-        get_season_obj.delete()
+        participation_id = request_body['id']
+        get_participation_obj = get_object_or_404(Participation, pk=participation_id)
+        get_participation_obj.delete()
         return Response({
-            "message" : str(get_season_obj) + " is successfully edited!",
+            "message" : str(get_participation_obj) + " is successfully edited!",
         }, status=status.HTTP_200_OK)
