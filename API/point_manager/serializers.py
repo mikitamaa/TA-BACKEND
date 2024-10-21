@@ -47,3 +47,7 @@ class ParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participation
         fields = '__all__'
+
+class AggregatedParticipationSerializer(serializers.Serializer):
+    player_name = serializers.CharField(source='player__name')
+    total_points = serializers.IntegerField()

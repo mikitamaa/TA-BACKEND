@@ -15,20 +15,36 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [username]
 
+    def __str__(self):
+        return self.name
+
+
 
 
 # ENTITIES
 class Liga(models.Model):
     name = models.CharField(max_length=35, unique=True)
 
+    def __str__(self):
+        return self.name
+
+
 class Player(models.Model):
     name = name = models.CharField(max_length=35, unique=True)
+
+    def __str__(self):
+        return self.name
+
     
 class Season(models.Model):
     name = models.CharField(max_length=35, unique=True)
 
+    def __str__(self):
+        return self.name
+
+
 class Event(models.Model):
-    name = name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     max_participant = models.IntegerField()
     base_point = models.IntegerField()
@@ -36,7 +52,14 @@ class Event(models.Model):
     managed_by = models.ForeignKey(CustomUser, related_name='admin', on_delete=models.CASCADE)
     liga = models.ForeignKey(Liga, related_name='liga', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+
+
 class Participation(models.Model):
     player =  models.ForeignKey(Player, on_delete=models.CASCADE)
     event =  models.ForeignKey(Event, on_delete=models.CASCADE)
     point_received = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(f"{self.player} - {self.event}")
