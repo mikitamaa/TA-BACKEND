@@ -10,11 +10,10 @@ from ..permissions import IsAdminUser, IsRangerUser
 
 class EventHandler(APIView):
     #GET
-    def get(self, request):
-        if 'id' in request.data:
-            event_id = request.data['id']
+    def get(self, request, id=None):
+        if id is not None:
             try:
-                event = Event.objects.get(id=event_id)
+                event = Event.objects.get(id=id)
                 serializer = EventSerializer(event)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Event.DoesNotExist:

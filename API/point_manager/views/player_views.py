@@ -10,10 +10,10 @@ from ..permissions import IsAdminUser, IsRangerUser
 
 class PlayerHandler(APIView):
     #get
-    def get(self, request):
-        if 'id' in request.data:
+    def get(self, request, id=None):
+        if id is not None:
             try:
-                player = Player.objects.get(id=request.data['id'])
+                player = Player.objects.get(id=id)
                 serializer = PlayerSerializer(player)
                 return Response({"data" : serializer.data}, status=status.HTTP_200_OK)
             except Player.DoesNotExist:
@@ -21,14 +21,14 @@ class PlayerHandler(APIView):
         
         player = Player.objects.all()
         serializer = PlayerSerializer(player, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     #register
     def post(self, request):
         serializer = PlayerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-        return Response()
+        return Response({'message': 'Data pemain berhasil dibuat!'}, status=status.HTTP_201_CREATED)
     
     #update
     def patch(self, request):
@@ -39,7 +39,7 @@ class PlayerHandler(APIView):
         get_player_obj.name = name
         get_player_obj.save()
         return Response({
-            "message" : str(get_player_obj) + " is successfully edited!",
+            "message" : str(get_player_obj.name) + " berhasil disunting!",
         }, status=status.HTTP_200_OK)
 
     #delete
@@ -47,7 +47,8 @@ class PlayerHandler(APIView):
         request_body = request.data
         player_id = request_body['id']
         get_player_obj = get_object_or_404(Player, pk=player_id)
+        temp = get_player_obj
         get_player_obj.delete()
         return Response({
-            "message" : str(get_player_obj) + " is successfully edited!",
+            "message" : str(temp) + " berhasil dihapus!",
         }, status=status.HTTP_200_OK)

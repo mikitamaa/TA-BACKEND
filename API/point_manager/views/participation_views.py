@@ -17,14 +17,16 @@ class ParticipationHandler(viewsets.ViewSet):
         serializer = ParticipationSerializer(participation, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def event_participation(self, request):
-        participation_event = request.data['event']
+    def event_participation(self, request, event_id):
         try:
-            event = Participation.objects.filter(event__id=participation_event)
+            event = Participation.objects.filter(event__id=event_id)
+            if not event.exists():
+                return Response([], status=status.HTTP_404_NOT_FOUND)
+            
             serializer = ParticipationSerializer(event, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Participation.DoesNotExist:
-            return Response({'message': 'Data partisipasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def liga_participation(self, request):
         participation_liga = request.data['liga']
@@ -42,21 +44,30 @@ class ParticipationHandler(viewsets.ViewSet):
     def post(self, request):
         player = request.data['player']
         event = request.data['event']
+
         try:
+            # Check if participation already exists
             Participation.objects.get(player=player, event=event)
+            return Response({'message': 'Data partisipasi sudah ada.'}, status=status.HTTP_400_BAD_REQUEST)
         except Participation.DoesNotExist:
+            # Create new participation
             serializer = ParticipationSerializer(data=request.data)
             if serializer.is_valid():
                 try:
+                    # Save the participation
                     serializer.save()
-                except:
-                    return Response({'message': 'Masih Error!'})
-            return Response({'message': 'Data Partisipasi berhasil dibuat.'})
+                    return Response({
+                        'data': serializer.data,  # This will now include the full player object
+                        'message': 'Data Partisipasi berhasil dibuat.'
+                    })
+                except Exception as e:
+                    return Response({'message': 'Masih Error!'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({'data': serializer.data, 'message': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({'message': 'Data partisipasi sudah ada.'})
-    
     #UPDATE
     def patch(self, request):
+        updated_participations = []
         try:
             for data in request.data:
                 try:
@@ -71,11 +82,19 @@ class ParticipationHandler(viewsets.ViewSet):
                     get_participation_obj.event = event
                     get_participation_obj.point_received = point_received
                     get_participation_obj.save()
+
+                    updated_participations.append({
+                    "id": get_participation_obj.id,
+                    "player": {"id": player.id, "name": player.name},
+                    "event": event.id,
+                    "point_received": get_participation_obj.point_received
+                })
                 except Participation.DoesNotExist:
                     return Response({'message': 'Data partisipasi tidak ada.'})
                 
             return Response({
-                "message" : "Data berhasil disunting!",
+                "message": "Data berhasil disunting!",
+                "data": updated_participations,
             }, status=status.HTTP_200_OK)
         except:
             return Response({
@@ -87,7 +106,8 @@ class ParticipationHandler(viewsets.ViewSet):
         request_body = request.data
         participation_id = request_body['id']
         get_participation_obj = get_object_or_404(Participation, pk=participation_id)
+        temp = get_participation_obj
         get_participation_obj.delete()
         return Response({
-            "message" : str(get_participation_obj) + " is successfully edited!",
+            "message" : str(temp) + " is successfully edited!",
         }, status=status.HTTP_200_OK)

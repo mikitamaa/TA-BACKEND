@@ -41,12 +41,36 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
+
+    def to_representation(self, instance):
+        # Get the original serialized data
+        data = super().to_representation(instance)
+
+        liga_data = LigaSerializer(instance.liga).data
+        season_data = SeasonSerializer(instance.season).data
+        data['liga'] = liga_data  
+        data['season'] = season_data 
+
+        return data
         
-    
+
 class ParticipationSerializer(serializers.ModelSerializer):
+    player = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all())  # Accept only player id
+
     class Meta:
         model = Participation
         fields = '__all__'
+
+    def to_representation(self, instance):
+        # Get the original serialized data (including player id)
+        data = super().to_representation(instance)
+
+        # Serialize the player to include its full object (id + name)
+        player_data = PlayerSerializer(instance.player).data
+        data['player'] = player_data  # Replace player ID with the full player object
+
+        return data
+    
 
 class AggregatedParticipationSerializer(serializers.Serializer):
     player_name = serializers.CharField(source='player__name')
