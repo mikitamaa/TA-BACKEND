@@ -28,11 +28,10 @@ class ParticipationHandler(viewsets.ViewSet):
         except Exception as e:
             return Response({'message': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    def liga_participation(self, request):
-        participation_liga = request.data['liga']
+    def liga_participation(self, request, liga_id):
         try:
-            event = Participation.objects.filter(event__liga=participation_liga) \
-                                    .values('player__name') \
+            event = Participation.objects.filter(event__liga__id=liga_id) \
+                                    .values('player__id', 'player__name') \
                                     .annotate(total_points=models.Sum('point_received')) \
                                     .order_by('-total_points')
             serializer = AggregatedParticipationSerializer(event, many=True)

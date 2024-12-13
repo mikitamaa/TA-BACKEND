@@ -73,5 +73,6 @@ class ParticipationSerializer(serializers.ModelSerializer):
     
 
 class AggregatedParticipationSerializer(serializers.Serializer):
-    player_name = serializers.CharField(source='player__name')
+    id = serializers.CharField(source='player__id')
+    name = serializers.CharField(source='player__name')
     total_points = serializers.IntegerField()

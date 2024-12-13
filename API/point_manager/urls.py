@@ -23,7 +23,7 @@ urlpatterns = [
     path('event/<int:id>/', EventHandler.as_view()),
     path('participation', ParticipationHandler.as_view({'get': 'all_participation'})),
     path('participation/event/<int:event_id>', ParticipationHandler.as_view({'get': 'event_participation'})),
-    path('participation/liga', ParticipationHandler.as_view({'get': 'liga_participation'})),
+    path('participation/liga/<int:liga_id>', ParticipationHandler.as_view({'get': 'liga_participation'})),
     path('participation/register', ParticipationHandler.as_view({'post': 'post'})),
     path('participation/edit', ParticipationHandler.as_view({'patch': 'patch'})),
     path('participation/edit', ParticipationHandler.as_view({'delete': 'delete'})),
