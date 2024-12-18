@@ -41,6 +41,7 @@ class LoginUser(APIView):
                 'refresh': str(token),
                 'access': str(token.access_token),
                 'name': user.name,
+                'id': user.id,
                 'is_admin': user.is_admin,
                 'is_ranger': user.is_ranger
             }

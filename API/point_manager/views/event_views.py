@@ -19,8 +19,8 @@ class EventHandler(APIView):
             except Event.DoesNotExist:
                 return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
         
-        if 'season' in request.data:
-            event_season = request.data['season']['id']
+        if 'season' in request.query_params:
+            event_season = request.query_params.get('season')
             try:
                 event = Event.objects.filter(season__id=event_season)
                 serializer = EventSerializer(event, many=True)
@@ -28,8 +28,8 @@ class EventHandler(APIView):
             except Event.DoesNotExist:
                 return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
             
-        if 'liga' in request.data:
-            event_liga = request.data['liga']['id']
+        if 'liga' in request.query_params:
+            event_liga = request.query_params.get('liga')
             try:
                 event = Event.objects.filter(liga__id=event_liga)
                 serializer = EventSerializer(event, many=True)
@@ -37,8 +37,8 @@ class EventHandler(APIView):
             except Event.DoesNotExist:
                 return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
             
-        if 'ranger_assigned' in request.data:
-            ranger_assigned = request.data['ranger_assigned']['id']
+        if 'ranger_assigned' in request.query_params:
+            ranger_assigned = request.query_params.get('ranger_assigned')
             try:
                 ranger = Event.objects.filter(ranger_assigned__id=ranger_assigned)
                 serializer = EventSerializer(ranger, many=True)
@@ -46,9 +46,20 @@ class EventHandler(APIView):
             except CustomUser.DoesNotExist:
                 return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
             
+        if 'managed_by' in request.query_params:
+            admin_assigned = request.query_params.get('managed_by')
+            try:
+                admin = Event.objects.filter(managed_by=admin_assigned)
+                serializer = EventSerializer(admin, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except CustomUser.DoesNotExist:
+                return Response({'message': 'Event tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
+            
         event = Event.objects.all()
         serializer = EventSerializer(event, many=True)
         return Response(serializer.data)
+        
+    
     
     #REGISTER
     def post(self, request):
