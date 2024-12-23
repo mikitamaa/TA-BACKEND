@@ -67,9 +67,11 @@ class EventHandler(APIView):
         if serializer.is_valid():
             try:
                 serializer.save()
-            except:
-                return Response({'message': 'Masih Error!'})
-        return Response({'message': 'Event berhasil dibuat.'})
+                return Response({'message': 'Event berhasil dibuat.'}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'message': 'Error saat menyimpan data.', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'message': 'Data tidak valid.', 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     
     #UPDATE
     def patch(self, request):
