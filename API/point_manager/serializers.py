@@ -48,8 +48,13 @@ class EventSerializer(serializers.ModelSerializer):
 
         liga_data = LigaSerializer(instance.liga).data
         season_data = SeasonSerializer(instance.season).data
+        ranger_data = CustomUserSerializer(instance.ranger_assigned).data
+        admin_data = CustomUserSerializer(instance.managed_by).data
+
         data['liga'] = liga_data  
         data['season'] = season_data 
+        data['ranger_assigned'] = ranger_data
+        data['managed_by'] = admin_data
 
         return data
         
