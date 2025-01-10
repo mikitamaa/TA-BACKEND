@@ -86,6 +86,7 @@ class EventHandler(APIView):
         base_point = request_body['base_point']
         description = request_body['description']
         period = request_body['period']
+        event_status = request_body['status']
 
         get_event_obj = get_object_or_404(Event, pk=event_id)
         get_event_obj.name = name
@@ -98,6 +99,7 @@ class EventHandler(APIView):
         get_event_obj.base_point = base_point
         get_event_obj.description = description
         get_event_obj.period = period
+        get_event_obj.status = event_status
         get_event_obj.save()
         return Response({
             "message" : str(get_event_obj) + " is successfully edited!",
