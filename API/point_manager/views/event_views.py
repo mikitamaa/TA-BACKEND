@@ -81,7 +81,7 @@ class EventHandler(APIView):
         season = Season.objects.get(id=request_body['season'])
         liga = Liga.objects.get(id=request_body['liga'])
         managed_by = CustomUser.objects.get(id=request_body['managed_by']['id'])
-        ranger_assigned = CustomUser.objects.get(id=request_body['ranger_assigned']['id'])
+        ranger_assigned = CustomUser.objects.get(id=request_body['ranger_assigned'])
         max_participant = request_body['max_participant']
         base_point = request_body['base_point']
         description = request_body['description']
