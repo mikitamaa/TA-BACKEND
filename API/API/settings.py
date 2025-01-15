@@ -28,7 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost:3000/',
-    '127.0.0.1'
+    '127.0.0.1',
+    '8.tcp.ngrok.io:17529'
 ]
 
 
@@ -62,6 +63,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://4ada-180-245-12-255.ngrok-free.app',
+    'https://ta-fe-t3io.vercel.app'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
