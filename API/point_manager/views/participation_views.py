@@ -38,6 +38,16 @@ class ParticipationHandler(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Participation.DoesNotExist:
             return Response({'message': 'Data partisipasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
+        
+    def all_time_points(self, request):
+        try:
+            event = Participation.objects.values('player__id', 'player__name') \
+                                    .annotate(total_points=models.Sum('point_received')) \
+                                    .order_by('-total_points')
+            serializer = AggregatedParticipationSerializer(event, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Participation.DoesNotExist:
+            return Response({'message': 'Data partisipasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
     
     #REGISTER
     def post(self, request):
